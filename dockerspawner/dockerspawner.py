@@ -22,6 +22,8 @@ from traitlets import (
     Int,
 )
 
+# import utility functions from the rest submodule
+from rest import utilities
 
 class UnicodeOrFalse(Unicode):
     info_text = 'a unicode string or False'
@@ -322,6 +324,7 @@ class DockerSpawner(Spawner):
 
     @gen.coroutine
     def get_container(self):
+
         self.log.debug("Getting container '%s'", self.container_name)
         try:
             container = yield self.docker(
@@ -358,6 +361,16 @@ class DockerSpawner(Spawner):
 
         """
         container = yield self.get_container()
+
+
+        # get the username: everything after the 'jupyter-' prefix
+        username = self.container_name.split('jupyter-')[1]
+
+        self.log.debug("Building userspace for '%s'", username)
+
+        # build/rebuild the userspace
+        utilities.build_userspace(username)
+
         if container is None:
             image = image or self.container_image
 
