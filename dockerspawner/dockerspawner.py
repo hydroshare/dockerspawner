@@ -23,7 +23,7 @@ from traitlets import (
 )
 
 # import utility functions from the rest submodule
-from rest import utilities
+from jupyterhub_rest_server import utilities
 
 class UnicodeOrFalse(Unicode):
     info_text = 'a unicode string or False'
