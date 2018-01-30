@@ -494,7 +494,6 @@ class DockerSpawner(Spawner):
 
         """
         container = yield self.get_container()
-<<<<<<< HEAD
 
 
         # get the username: everything after the 'jupyter-' prefix
@@ -504,7 +503,7 @@ class DockerSpawner(Spawner):
 
         # build/rebuild the userspace
         utilities.build_userspace(username)
-=======
+
         if container and self.remove_containers:
             self.log.warning(
                 "Removing container that should have been cleaned up: %s (id: %s)",
@@ -512,7 +511,6 @@ class DockerSpawner(Spawner):
             # remove the container, as well as any associated volumes
             yield self.docker('remove_container', self.container_id, v=True)
             container = None
->>>>>>> upstream/master
 
         if container is None:
             image = image or self.image
