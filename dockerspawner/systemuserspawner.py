@@ -1,17 +1,12 @@
-import pwd
-
 from dockerspawner import DockerSpawner
 from textwrap import dedent
 from traitlets import (
     Integer,
     Unicode,
 )
-from tornado import gen
 
 
 class SystemUserSpawner(DockerSpawner):
-
-    container_image = Unicode("jupyterhub/systemuser", config=True)
 
     host_homedir_format_string = Unicode(
         "/home/{username}",
@@ -100,10 +95,13 @@ class SystemUserSpawner(DockerSpawner):
 
     def get_env(self):
         env = super(SystemUserSpawner, self).get_env()
+        # relies on NB_USER and NB_UID handling in jupyter/docker-stacks
         env.update(dict(
-            USER=self.user.name,
-            USER_ID=self.user_id,
-            HOME=self.homedir
+            USER=self.user.name, # deprecated
+            NB_USER=self.user.name,
+            USER_ID=self.user_id, # deprecated
+            NB_UID=self.user_id,
+            HOME=self.homedir,
         ))
         return env
     
@@ -115,6 +113,7 @@ class SystemUserSpawner(DockerSpawner):
         this will never be called, which is necessary if
         the system users are not on the Hub system (i.e. Hub itself is in a container).
         """
+        import pwd
         return pwd.getpwnam(self.user.name).pw_uid
 
     def load_state(self, state):
@@ -128,10 +127,20 @@ class SystemUserSpawner(DockerSpawner):
             state['user_id'] = self.user_id
         return state
 
-    @gen.coroutine
-    def start(self, image=None):
+    def start(self, image=None, extra_create_kwargs=None,
+        extra_start_kwargs=None, extra_host_config=None):
         """start the single-user server in a docker container"""
-        yield super(SystemUserSpawner, self).start(
+        if extra_create_kwargs is None:
+            extra_create_kwargs = {}
+
+        extra_create_kwargs.setdefault('working_dir', self.homedir)
+        # systemuser image must be started as root
+        # relies on NB_UID and NB_USER handling in docker-stacks
+        extra_create_kwargs.setdefault('user', '0')
+
+        return super(SystemUserSpawner, self).start(
             image=image,
-            extra_create_kwargs={'working_dir': self.homedir}
+            extra_create_kwargs=extra_create_kwargs,
+            extra_start_kwargs=extra_start_kwargs,
+            extra_host_config=extra_host_config
         )
