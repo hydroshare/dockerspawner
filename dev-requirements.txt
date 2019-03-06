@@ -1,4 +1,6 @@
 codecov
+pytest>=3.6,<4
 pytest-cov
-pytest>=2.8
+pytest-tornado
 pyflakes
+notebook
