@@ -1017,8 +1017,8 @@ class DockerSpawner(Spawner):
         )
 
         # get the username: everything after the 'jupyter-' prefix
-        username = self.container_id.split('jupyter-')[1]
-        self.log.debug("DOCKERSPAWNER: Building userspace for '%s'", username)
+        username = self.object_name.split('jupyter-')[1]
+        self.log.debug("DOCKERSPAWNER [SKIPPING]: Building userspace for '%s'", username)
 #        # build/rebuild the userspace
 #        utilities.build_userspace(username)
 
